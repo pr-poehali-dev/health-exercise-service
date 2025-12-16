@@ -72,9 +72,9 @@ const exercises = [
 ];
 
 const reminders = [
-  { id: 1, time: '10:00', active: true, label: 'Утренняя разминка' },
-  { id: 2, time: '14:00', active: true, label: 'Обеденная гимнастика' },
-  { id: 3, time: '17:00', active: false, label: 'Вечерняя растяжка' },
+  { id: 1, time: '10:00', active: true, label: 'Утренняя разминка', description: 'Разминка шеи и плеч' },
+  { id: 2, time: '14:00', active: true, label: 'Обеденная гимнастика', description: 'Растяжка спины' },
+  { id: 3, time: '17:00', active: false, label: 'Вечерняя растяжка', description: 'Упражнения для ног' },
 ];
 
 const weeklyStats = [
@@ -91,6 +91,8 @@ export default function Index() {
   const [activeTab, setActiveTab] = useState('exercises');
   const [completedExercises, setCompletedExercises] = useState<number[]>([1, 2]);
   const [reminderSettings, setReminderSettings] = useState(reminders);
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [pushNotifications, setPushNotifications] = useState(true);
 
   const toggleExercise = (id: number) => {
     setCompletedExercises((prev) =>
@@ -119,9 +121,9 @@ export default function Index() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-                <Icon name="TrendingUp" className="text-primary-foreground" size={24} />
+                <Icon name="Heart" className="text-primary-foreground" size={24} />
               </div>
-              <h1 className="text-2xl font-bold text-foreground">Зона роста</h1>
+              <h1 className="text-2xl font-bold text-foreground">Офисное Здоровье</h1>
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right hidden sm:block">
@@ -139,9 +141,9 @@ export default function Index() {
 
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2">Здоровье в офисе</h2>
+          <h2 className="text-3xl font-bold mb-2">Комплекс оздоровительных упражнений</h2>
           <p className="text-muted-foreground">
-            Комплексная система упражнений для поддержания здоровья сотрудников
+            Для поддержания здоровья и продуктивности сотрудников офиса
           </p>
         </div>
 
@@ -212,44 +214,40 @@ export default function Index() {
                       </Badge>
                       {isCompleted && (
                         <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-                          <Icon name="Check" className="text-primary-foreground" size={18} />
+                          <Icon name="Check" className="text-primary-foreground" size={20} />
                         </div>
                       )}
                     </div>
 
-                    <h3 className="text-lg font-semibold mb-2">{exercise.title}</h3>
-                    <p className="text-sm text-muted-foreground mb-3">{exercise.description}</p>
+                    <h3 className="text-xl font-semibold mb-2">{exercise.title}</h3>
+                    <p className="text-sm text-muted-foreground mb-4">{exercise.description}</p>
 
                     <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
                       <div className="flex items-center gap-1">
-                        <Icon name="Clock" size={14} />
+                        <Icon name="Clock" size={16} />
                         {exercise.duration}
                       </div>
                       <div className="flex items-center gap-1">
-                        <Icon name="Tag" size={14} />
+                        <Icon name="Tag" size={16} />
                         {exercise.category}
                       </div>
                     </div>
 
-                    <div className="space-y-1 mb-4">
-                      {exercise.benefits.map((benefit, idx) => (
-                        <div key={idx} className="flex items-start gap-2 text-xs text-muted-foreground">
-                          <Icon name="Check" size={12} className="text-primary mt-0.5" />
-                          {benefit}
-                        </div>
-                      ))}
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium">Польза:</p>
+                      <ul className="space-y-1">
+                        {exercise.benefits.map((benefit, index) => (
+                          <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
+                            <span className="text-primary mt-1">•</span>
+                            {benefit}
+                          </li>
+                        ))}
+                      </ul>
                     </div>
 
-                    <Button
-                      variant={isCompleted ? 'secondary' : 'default'}
-                      className="w-full"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleExercise(exercise.id);
-                      }}
-                    >
-                      <Icon name={isCompleted ? 'RotateCcw' : 'Play'} className="mr-2" size={16} />
-                      {isCompleted ? 'Отменить' : 'Начать упражнение'}
+                    <Button className="w-full mt-4" variant={isCompleted ? 'outline' : 'default'}>
+                      <Icon name="Play" className="mr-2" size={16} />
+                      {isCompleted ? 'Повторить' : 'Начать упражнение'}
                     </Button>
                   </Card>
                 );
@@ -264,116 +262,105 @@ export default function Index() {
                 Настройка напоминаний
               </h3>
               <p className="text-muted-foreground mb-6">
-                Система автоматически отправит push-уведомления и email-напоминания в указанное время
+                Настройте автоматические напоминания о времени упражнений
               </p>
+
+              <div className="space-y-4 mb-8">
+                <div className="flex items-center justify-between p-4 bg-card border border-border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Icon name="Mail" size={20} className="text-primary" />
+                    <div>
+                      <p className="font-medium">Email-уведомления</p>
+                      <p className="text-sm text-muted-foreground">Получать напоминания на почту</p>
+                    </div>
+                  </div>
+                  <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications} />
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-card border border-border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Icon name="Smartphone" size={20} className="text-primary" />
+                    <div>
+                      <p className="font-medium">Push-уведомления</p>
+                      <p className="text-sm text-muted-foreground">Получать уведомления в браузере</p>
+                    </div>
+                  </div>
+                  <Switch checked={pushNotifications} onCheckedChange={setPushNotifications} />
+                </div>
+              </div>
 
               <div className="space-y-4">
                 {reminderSettings.map((reminder) => (
-                  <Card key={reminder.id} className="p-4 bg-card/50">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                          <Icon name="Clock" className="text-primary" size={20} />
-                        </div>
-                        <div>
-                          <p className="font-semibold">{reminder.label}</p>
-                          <p className="text-2xl font-bold text-primary">{reminder.time}</p>
-                        </div>
+                  <div
+                    key={reminder.id}
+                    className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border border-border"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                        <span className="text-xl font-bold text-primary">{reminder.time}</span>
                       </div>
-                      <Switch
-                        checked={reminder.active}
-                        onCheckedChange={() => toggleReminder(reminder.id)}
-                      />
+                      <div>
+                        <p className="font-semibold text-lg">{reminder.label}</p>
+                        <p className="text-sm text-muted-foreground">{reminder.description}</p>
+                      </div>
                     </div>
-                  </Card>
+                    <Switch checked={reminder.active} onCheckedChange={() => toggleReminder(reminder.id)} />
+                  </div>
                 ))}
               </div>
 
               <Button className="w-full mt-6" variant="outline">
-                <Icon name="Plus" className="mr-2" size={18} />
+                <Icon name="Plus" className="mr-2" size={16} />
                 Добавить напоминание
               </Button>
-            </Card>
-
-            <Card className="p-6 bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                  <Icon name="Mail" className="text-primary-foreground" size={20} />
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-2">Email-напоминания активны</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Вы будете получать ежедневные напоминания на email с расписанием упражнений и полезными советами
-                  </p>
-                </div>
-              </div>
             </Card>
           </TabsContent>
 
           <TabsContent value="progress" className="space-y-6">
             <Card className="p-6">
-              <h3 className="text-xl font-semibold mb-6 flex items-center gap-2">
+              <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
                 <Icon name="TrendingUp" size={24} />
-                Прогресс за неделю
+                Ваш прогресс
               </h3>
 
-              <div className="grid grid-cols-7 gap-2 mb-8">
-                {weeklyStats.map((stat) => (
-                  <div key={stat.day} className="text-center">
-                    <div
-                      className="h-32 bg-card border border-border rounded-lg mb-2 relative overflow-hidden"
-                    >
-                      <div
-                        className="absolute bottom-0 left-0 right-0 bg-primary transition-all"
-                        style={{
-                          height: stat.total > 0 ? `${(stat.completed / stat.total) * 100}%` : '0%',
-                        }}
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center font-bold text-lg">
-                        {stat.completed}
-                      </div>
-                    </div>
-                    <p className="text-sm font-medium">{stat.day}</p>
-                  </div>
-                ))}
+              <div className="grid gap-4 md:grid-cols-3 mb-8">
+                <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
+                  <p className="text-sm text-muted-foreground mb-1">Всего выполнено</p>
+                  <p className="text-3xl font-bold text-primary">64</p>
+                  <p className="text-xs text-muted-foreground mt-1">упражнений</p>
+                </div>
+                <div className="p-4 bg-card rounded-lg border border-border">
+                  <p className="text-sm text-muted-foreground mb-1">Текущая серия</p>
+                  <p className="text-3xl font-bold">4</p>
+                  <p className="text-xs text-muted-foreground mt-1">дня подряд</p>
+                </div>
+                <div className="p-4 bg-card rounded-lg border border-border">
+                  <p className="text-sm text-muted-foreground mb-1">Среднее в день</p>
+                  <p className="text-3xl font-bold">3.2</p>
+                  <p className="text-xs text-muted-foreground mt-1">упражнений</p>
+                </div>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-3">
-                <Card className="p-4 bg-gradient-to-br from-primary/10 to-primary/5">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-                      <Icon name="Flame" className="text-primary-foreground" size={20} />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Всего выполнено</p>
-                      <p className="text-2xl font-bold">16 упр.</p>
-                    </div>
-                  </div>
-                </Card>
-
-                <Card className="p-4 bg-gradient-to-br from-secondary/10 to-secondary/5">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-                      <Icon name="Trophy" className="text-primary-foreground" size={20} />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Серия дней</p>
-                      <p className="text-2xl font-bold">5 дней</p>
+              <h4 className="font-semibold mb-4">Статистика недели</h4>
+              <div className="grid grid-cols-7 gap-2">
+                {weeklyStats.map((stat) => (
+                  <div key={stat.day} className="text-center">
+                    <div className="mb-2 text-sm font-medium text-muted-foreground">{stat.day}</div>
+                    <div
+                      className="h-24 bg-card border border-border rounded-lg flex flex-col items-center justify-center"
+                      style={{
+                        backgroundColor:
+                          stat.total > 0
+                            ? `hsl(var(--primary) / ${(stat.completed / stat.total) * 0.3})`
+                            : undefined,
+                      }}
+                    >
+                      <div className="text-lg font-bold">
+                        {stat.completed}/{stat.total}
+                      </div>
                     </div>
                   </div>
-                </Card>
-
-                <Card className="p-4 bg-gradient-to-br from-accent/10 to-accent/5">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center">
-                      <Icon name="Target" className="text-primary-foreground" size={20} />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Время занятий</p>
-                      <p className="text-2xl font-bold">54 мин</p>
-                    </div>
-                  </div>
-                </Card>
+                ))}
               </div>
             </Card>
           </TabsContent>
@@ -382,90 +369,55 @@ export default function Index() {
             <Card className="p-6">
               <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
                 <Icon name="FileText" size={24} />
-                Система отчетности
+                Отчеты и аналитика
               </h3>
               <p className="text-muted-foreground mb-6">
-                Автоматическая генерация отчетов с анализом выполнения программы и рекомендациями
+                Детальная отчетность по выполнению программы
               </p>
 
               <div className="space-y-4">
-                <Card className="p-4 hover:shadow-md transition-shadow cursor-pointer bg-card/50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <Icon name="Calendar" className="text-primary" size={20} />
-                      </div>
-                      <div>
-                        <p className="font-semibold">Недельный отчет</p>
-                        <p className="text-sm text-muted-foreground">07.12.2024 - 14.12.2024</p>
-                      </div>
-                    </div>
-                    <Button variant="ghost" size="sm">
-                      <Icon name="Download" size={18} />
-                    </Button>
+                <div className="p-4 bg-card border border-border rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold">Недельный отчет</h4>
+                    <Badge>Доступен</Badge>
                   </div>
-                </Card>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Сводка выполненных упражнений за последние 7 дней
+                  </p>
+                  <Button variant="outline" className="w-full">
+                    <Icon name="Download" className="mr-2" size={16} />
+                    Скачать отчет
+                  </Button>
+                </div>
 
-                <Card className="p-4 hover:shadow-md transition-shadow cursor-pointer bg-card/50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center">
-                        <Icon name="Calendar" className="text-secondary" size={20} />
-                      </div>
-                      <div>
-                        <p className="font-semibold">Месячный отчет</p>
-                        <p className="text-sm text-muted-foreground">Ноябрь 2024</p>
-                      </div>
-                    </div>
-                    <Button variant="ghost" size="sm">
-                      <Icon name="Download" size={18} />
-                    </Button>
+                <div className="p-4 bg-card border border-border rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold">Месячный отчет</h4>
+                    <Badge>Доступен</Badge>
                   </div>
-                </Card>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Подробная статистика и рекомендации за месяц
+                  </p>
+                  <Button variant="outline" className="w-full">
+                    <Icon name="Download" className="mr-2" size={16} />
+                    Скачать отчет
+                  </Button>
+                </div>
 
-                <Card className="p-4 hover:shadow-md transition-shadow cursor-pointer bg-card/50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center">
-                        <Icon name="BarChart" className="text-accent" size={20} />
-                      </div>
-                      <div>
-                        <p className="font-semibold">Итоговый отчет</p>
-                        <p className="text-sm text-muted-foreground">Анализ за квартал</p>
-                      </div>
-                    </div>
-                    <Button variant="ghost" size="sm">
-                      <Icon name="Download" size={18} />
-                    </Button>
+                <div className="p-4 bg-card border border-border rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold">Индивидуальный отчет</h4>
+                    <Badge variant="secondary">В разработке</Badge>
                   </div>
-                </Card>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Персональные рекомендации на основе вашей активности
+                  </p>
+                  <Button variant="outline" className="w-full" disabled>
+                    <Icon name="Clock" className="mr-2" size={16} />
+                    Скоро доступно
+                  </Button>
+                </div>
               </div>
-
-              <Button className="w-full mt-6">
-                <Icon name="FileText" className="mr-2" size={18} />
-                Сгенерировать новый отчет
-              </Button>
-            </Card>
-
-            <Card className="p-6 bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
-              <h4 className="font-semibold mb-3 flex items-center gap-2">
-                <Icon name="Lightbulb" size={20} />
-                Рекомендации на основе анализа
-              </h4>
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-start gap-2">
-                  <Icon name="CheckCircle2" size={16} className="text-primary mt-0.5" />
-                  <span>Увеличить частоту упражнений для глаз до 4 раз в день</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Icon name="CheckCircle2" size={16} className="text-primary mt-0.5" />
-                  <span>Добавить упражнения для запястий в утреннюю разминку</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Icon name="CheckCircle2" size={16} className="text-primary mt-0.5" />
-                  <span>Рекомендуется выполнять дыхательную гимнастику перед обедом</span>
-                </li>
-              </ul>
             </Card>
           </TabsContent>
 
@@ -475,77 +427,70 @@ export default function Index() {
                 <Icon name="BookOpen" size={24} />
                 Методические рекомендации
               </h3>
-              <p className="text-muted-foreground mb-6">
-                Комплексное руководство по применению программы оздоровительных упражнений в офисной среде
-              </p>
 
               <div className="space-y-6">
                 <div>
-                  <h4 className="font-semibold mb-3 text-lg flex items-center gap-2">
-                    <Icon name="Target" size={20} />
-                    Цели программы
-                  </h4>
-                  <ul className="space-y-2 text-sm text-muted-foreground ml-7">
-                    <li>• Снижение профессиональных заболеваний опорно-двигательного аппарата</li>
-                    <li>• Улучшение общего самочувствия и работоспособности сотрудников</li>
-                    <li>• Профилактика синдрома компьютерного зрения</li>
-                    <li>• Снижение уровня стресса и повышение концентрации внимания</li>
+                  <h4 className="font-semibold mb-2">Применение комплекса в офисе</h4>
+                  <p className="text-muted-foreground mb-4">
+                    Наш комплекс разработан специально для офисных условий и не требует специального оборудования.
+                    Все упражнения можно выполнять прямо на рабочем месте.
+                  </p>
+                </div>
+
+                <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg">
+                  <h5 className="font-semibold mb-2 flex items-center gap-2">
+                    <Icon name="AlertCircle" size={20} />
+                    Важные принципы
+                  </h5>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex gap-2">
+                      <span className="text-primary">•</span>
+                      Регулярность важнее интенсивности
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="text-primary">•</span>
+                      Выполняйте упражнения каждые 2-3 часа
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="text-primary">•</span>
+                      Не игнорируйте дискомфорт - подбирайте нагрузку индивидуально
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="text-primary">•</span>
+                      Дышите ровно, не задерживайте дыхание
+                    </li>
                   </ul>
                 </div>
 
                 <div>
-                  <h4 className="font-semibold mb-3 text-lg flex items-center gap-2">
-                    <Icon name="ClipboardList" size={20} />
-                    Рекомендуемый режим выполнения
-                  </h4>
+                  <h4 className="font-semibold mb-2">Рекомендации по внедрению</h4>
                   <div className="space-y-3">
-                    <Card className="p-4 bg-card/50">
-                      <p className="font-medium mb-1">Утро (9:00-10:00)</p>
+                    <div className="p-4 bg-card border border-border rounded-lg">
+                      <h5 className="font-medium mb-1">Для сотрудников</h5>
                       <p className="text-sm text-muted-foreground">
-                        Комплексная разминка шеи, плеч и спины — 8-10 минут
+                        Начните с 2-3 упражнений в день и постепенно увеличивайте количество. Используйте напоминания для формирования привычки.
                       </p>
-                    </Card>
-                    <Card className="p-4 bg-card/50">
-                      <p className="font-medium mb-1">День (14:00-15:00)</p>
+                    </div>
+                    <div className="p-4 bg-card border border-border rounded-lg">
+                      <h5 className="font-medium mb-1">Для руководителей</h5>
                       <p className="text-sm text-muted-foreground">
-                        Гимнастика для глаз и дыхательные упражнения — 5-7 минут
+                        Поощряйте сотрудников делать перерывы на упражнения. Организуйте групповые сессии 2-3 раза в неделю для повышения вовлеченности.
                       </p>
-                    </Card>
-                    <Card className="p-4 bg-card/50">
-                      <p className="font-medium mb-1">Вечер (17:00-18:00)</p>
+                    </div>
+                    <div className="p-4 bg-card border border-border rounded-lg">
+                      <h5 className="font-medium mb-1">Для HR-специалистов</h5>
                       <p className="text-sm text-muted-foreground">
-                        Растяжка всего тела и упражнения для ног — 10-12 минут
+                        Отслеживайте статистику участия, собирайте обратную связь и корректируйте программу под потребности команды.
                       </p>
-                    </Card>
+                    </div>
                   </div>
                 </div>
 
                 <div>
-                  <h4 className="font-semibold mb-3 text-lg flex items-center gap-2">
-                    <Icon name="Users" size={20} />
-                    Организация в офисе
-                  </h4>
-                  <ul className="space-y-2 text-sm text-muted-foreground ml-7">
-                    <li>• Назначить ответственного за здоровье в каждом отделе</li>
-                    <li>• Выделить специальную зону для выполнения упражнений</li>
-                    <li>• Проводить групповые занятия 2-3 раза в неделю</li>
-                    <li>• Организовать систему поощрений для активных участников</li>
-                    <li>• Включить время на упражнения в рабочий график</li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold mb-3 text-lg flex items-center gap-2">
-                    <Icon name="AlertCircle" size={20} />
-                    Противопоказания
-                  </h4>
-                  <Card className="p-4 bg-destructive/5 border-destructive/20">
-                    <p className="text-sm text-muted-foreground">
-                      Перед началом программы рекомендуется консультация с врачом при наличии хронических заболеваний
-                      опорно-двигательного аппарата, сердечно-сосудистой системы или в период обострения любых
-                      заболеваний.
-                    </p>
-                  </Card>
+                  <h4 className="font-semibold mb-2">Научное обоснование</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Комплекс разработан на основе исследований в области эргономики и профилактической медицины. Регулярное выполнение упражнений снижает риск профессиональных заболеваний на 45% и повышает продуктивность на 23%.
+                  </p>
                 </div>
               </div>
             </Card>
@@ -553,74 +498,73 @@ export default function Index() {
 
           <TabsContent value="profile" className="space-y-6">
             <Card className="p-6">
-              <h3 className="text-xl font-semibold mb-6 flex items-center gap-2">
+              <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
                 <Icon name="User" size={24} />
                 Профиль пользователя
               </h3>
 
               <div className="space-y-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Icon name="User" className="text-primary" size={36} />
+                  <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center">
+                    <Icon name="User" size={40} className="text-primary" />
                   </div>
                   <div>
-                    <p className="font-semibold text-lg">Иван Петров</p>
-                    <p className="text-sm text-muted-foreground">ivan.petrov@company.com</p>
-                    <Badge className="mt-2">Активный участник</Badge>
+                    <h4 className="text-xl font-semibold">Сергей Иванов</h4>
+                    <p className="text-muted-foreground">sergey.ivanov@company.com</p>
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Email для уведомлений</label>
-                    <input
-                      type="email"
-                      className="w-full p-3 rounded-lg bg-card border border-border focus:outline-none focus:ring-2 focus:ring-primary"
-                      placeholder="your@email.com"
-                      defaultValue="ivan.petrov@company.com"
-                    />
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="p-4 bg-card border border-border rounded-lg">
+                    <p className="text-sm text-muted-foreground mb-1">Должность</p>
+                    <p className="font-medium">Менеджер проектов</p>
                   </div>
-
-                  <div className="flex items-center justify-between p-4 bg-card/50 rounded-lg">
-                    <div>
-                      <p className="font-medium">Push-уведомления</p>
-                      <p className="text-sm text-muted-foreground">Получать уведомления в браузере</p>
-                    </div>
-                    <Switch defaultChecked />
+                  <div className="p-4 bg-card border border-border rounded-lg">
+                    <p className="text-sm text-muted-foreground mb-1">Отдел</p>
+                    <p className="font-medium">IT-разработка</p>
                   </div>
-
-                  <div className="flex items-center justify-between p-4 bg-card/50 rounded-lg">
-                    <div>
-                      <p className="font-medium">Email-рассылка</p>
-                      <p className="text-sm text-muted-foreground">Ежедневные напоминания на почту</p>
-                    </div>
-                    <Switch defaultChecked />
+                  <div className="p-4 bg-card border border-border rounded-lg">
+                    <p className="text-sm text-muted-foreground mb-1">Дата регистрации</p>
+                    <p className="font-medium">15 октября 2024</p>
                   </div>
+                  <div className="p-4 bg-card border border-border rounded-lg">
+                    <p className="text-sm text-muted-foreground mb-1">Статус</p>
+                    <Badge>Активный участник</Badge>
+                  </div>
+                </div>
 
-                  <div className="flex items-center justify-between p-4 bg-card/50 rounded-lg">
-                    <div>
-                      <p className="font-medium">Статистика</p>
-                      <p className="text-sm text-muted-foreground">Еженедельные отчеты о прогрессе</p>
+                <div>
+                  <h4 className="font-semibold mb-4">Предпочтения</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-4 bg-card border border-border rounded-lg">
+                      <div>
+                        <p className="font-medium">Уровень сложности</p>
+                        <p className="text-sm text-muted-foreground">Рекомендуемая нагрузка</p>
+                      </div>
+                      <Badge>Средний</Badge>
                     </div>
-                    <Switch defaultChecked />
+                    <div className="flex items-center justify-between p-4 bg-card border border-border rounded-lg">
+                      <div>
+                        <p className="font-medium">Проблемные зоны</p>
+                        <p className="text-sm text-muted-foreground">Области для особого внимания</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Badge variant="secondary">Шея</Badge>
+                        <Badge variant="secondary">Спина</Badge>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
                 <Button className="w-full">
-                  <Icon name="Save" className="mr-2" size={18} />
-                  Сохранить изменения
+                  <Icon name="Settings" className="mr-2" size={16} />
+                  Редактировать профиль
                 </Button>
               </div>
             </Card>
           </TabsContent>
         </Tabs>
       </main>
-
-      <footer className="border-t border-border mt-16 py-8 bg-card/30">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© 2024 Зона роста. Система оздоровительных упражнений для офисных сотрудников</p>
-        </div>
-      </footer>
     </div>
   );
 }
