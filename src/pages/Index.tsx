@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Switch } from '@/components/ui/switch';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
+import ExercisesTab from '@/components/ExercisesTab';
+import RemindersTab from '@/components/RemindersTab';
+import ProgressTab from '@/components/ProgressTab';
+import { ReportsTab, MethodologyTab, ProfileTab } from '@/components/OtherTabs';
 
 const exercises = [
   {
@@ -175,393 +175,40 @@ export default function Index() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="exercises" className="space-y-6">
-            <Card className="p-6 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-xl font-semibold mb-1">Ваш прогресс сегодня</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Выполнено {completedExercises.length} из {exercises.length} упражнений
-                  </p>
-                </div>
-                <div className="text-4xl font-bold text-primary">{Math.round(totalProgress)}%</div>
-              </div>
-              <Progress value={totalProgress} className="h-3" />
-            </Card>
-
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {exercises.map((exercise) => {
-                const isCompleted = completedExercises.includes(exercise.id);
-                return (
-                  <Card
-                    key={exercise.id}
-                    className={`p-6 transition-all hover:shadow-lg hover:shadow-primary/5 cursor-pointer ${
-                      isCompleted ? 'border-primary bg-primary/5' : ''
-                    }`}
-                    onClick={() => toggleExercise(exercise.id)}
-                  >
-                    <div className="flex items-start justify-between mb-4">
-                      <Badge
-                        variant={
-                          exercise.difficulty === 'Легко'
-                            ? 'secondary'
-                            : exercise.difficulty === 'Средне'
-                            ? 'default'
-                            : 'destructive'
-                        }
-                      >
-                        {exercise.difficulty}
-                      </Badge>
-                      {isCompleted && (
-                        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-                          <Icon name="Check" className="text-primary-foreground" size={20} />
-                        </div>
-                      )}
-                    </div>
-
-                    <h3 className="text-xl font-semibold mb-2">{exercise.title}</h3>
-                    <p className="text-sm text-muted-foreground mb-4">{exercise.description}</p>
-
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-                      <div className="flex items-center gap-1">
-                        <Icon name="Clock" size={16} />
-                        {exercise.duration}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Icon name="Tag" size={16} />
-                        {exercise.category}
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium">Польза:</p>
-                      <ul className="space-y-1">
-                        {exercise.benefits.map((benefit, index) => (
-                          <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
-                            <span className="text-primary mt-1">•</span>
-                            {benefit}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <Button className="w-full mt-4" variant={isCompleted ? 'outline' : 'default'}>
-                      <Icon name="Play" className="mr-2" size={16} />
-                      {isCompleted ? 'Повторить' : 'Начать упражнение'}
-                    </Button>
-                  </Card>
-                );
-              })}
-            </div>
+          <TabsContent value="exercises">
+            <ExercisesTab
+              exercises={exercises}
+              completedExercises={completedExercises}
+              toggleExercise={toggleExercise}
+              totalProgress={totalProgress}
+            />
           </TabsContent>
 
-          <TabsContent value="reminders" className="space-y-6">
-            <Card className="p-6">
-              <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <Icon name="Bell" size={24} />
-                Настройка напоминаний
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                Настройте автоматические напоминания о времени упражнений
-              </p>
-
-              <div className="space-y-4 mb-8">
-                <div className="flex items-center justify-between p-4 bg-card border border-border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <Icon name="Mail" size={20} className="text-primary" />
-                    <div>
-                      <p className="font-medium">Email-уведомления</p>
-                      <p className="text-sm text-muted-foreground">Получать напоминания на почту</p>
-                    </div>
-                  </div>
-                  <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications} />
-                </div>
-
-                <div className="flex items-center justify-between p-4 bg-card border border-border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <Icon name="Smartphone" size={20} className="text-primary" />
-                    <div>
-                      <p className="font-medium">Push-уведомления</p>
-                      <p className="text-sm text-muted-foreground">Получать уведомления в браузере</p>
-                    </div>
-                  </div>
-                  <Switch checked={pushNotifications} onCheckedChange={setPushNotifications} />
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                {reminderSettings.map((reminder) => (
-                  <div
-                    key={reminder.id}
-                    className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border border-border"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-                        <span className="text-xl font-bold text-primary">{reminder.time}</span>
-                      </div>
-                      <div>
-                        <p className="font-semibold text-lg">{reminder.label}</p>
-                        <p className="text-sm text-muted-foreground">{reminder.description}</p>
-                      </div>
-                    </div>
-                    <Switch checked={reminder.active} onCheckedChange={() => toggleReminder(reminder.id)} />
-                  </div>
-                ))}
-              </div>
-
-              <Button className="w-full mt-6" variant="outline">
-                <Icon name="Plus" className="mr-2" size={16} />
-                Добавить напоминание
-              </Button>
-            </Card>
+          <TabsContent value="reminders">
+            <RemindersTab
+              reminderSettings={reminderSettings}
+              emailNotifications={emailNotifications}
+              pushNotifications={pushNotifications}
+              setEmailNotifications={setEmailNotifications}
+              setPushNotifications={setPushNotifications}
+              toggleReminder={toggleReminder}
+            />
           </TabsContent>
 
-          <TabsContent value="progress" className="space-y-6">
-            <Card className="p-6">
-              <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <Icon name="TrendingUp" size={24} />
-                Ваш прогресс
-              </h3>
-
-              <div className="grid gap-4 md:grid-cols-3 mb-8">
-                <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
-                  <p className="text-sm text-muted-foreground mb-1">Всего выполнено</p>
-                  <p className="text-3xl font-bold text-primary">64</p>
-                  <p className="text-xs text-muted-foreground mt-1">упражнений</p>
-                </div>
-                <div className="p-4 bg-card rounded-lg border border-border">
-                  <p className="text-sm text-muted-foreground mb-1">Текущая серия</p>
-                  <p className="text-3xl font-bold">4</p>
-                  <p className="text-xs text-muted-foreground mt-1">дня подряд</p>
-                </div>
-                <div className="p-4 bg-card rounded-lg border border-border">
-                  <p className="text-sm text-muted-foreground mb-1">Среднее в день</p>
-                  <p className="text-3xl font-bold">3.2</p>
-                  <p className="text-xs text-muted-foreground mt-1">упражнений</p>
-                </div>
-              </div>
-
-              <h4 className="font-semibold mb-4">Статистика недели</h4>
-              <div className="grid grid-cols-7 gap-2">
-                {weeklyStats.map((stat) => (
-                  <div key={stat.day} className="text-center">
-                    <div className="mb-2 text-sm font-medium text-muted-foreground">{stat.day}</div>
-                    <div
-                      className="h-24 bg-card border border-border rounded-lg flex flex-col items-center justify-center"
-                      style={{
-                        backgroundColor:
-                          stat.total > 0
-                            ? `hsl(var(--primary) / ${(stat.completed / stat.total) * 0.3})`
-                            : undefined,
-                      }}
-                    >
-                      <div className="text-lg font-bold">
-                        {stat.completed}/{stat.total}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
+          <TabsContent value="progress">
+            <ProgressTab weeklyStats={weeklyStats} />
           </TabsContent>
 
-          <TabsContent value="reports" className="space-y-6">
-            <Card className="p-6">
-              <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <Icon name="FileText" size={24} />
-                Отчеты и аналитика
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                Детальная отчетность по выполнению программы
-              </p>
-
-              <div className="space-y-4">
-                <div className="p-4 bg-card border border-border rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-semibold">Недельный отчет</h4>
-                    <Badge>Доступен</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Сводка выполненных упражнений за последние 7 дней
-                  </p>
-                  <Button variant="outline" className="w-full">
-                    <Icon name="Download" className="mr-2" size={16} />
-                    Скачать отчет
-                  </Button>
-                </div>
-
-                <div className="p-4 bg-card border border-border rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-semibold">Месячный отчет</h4>
-                    <Badge>Доступен</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Подробная статистика и рекомендации за месяц
-                  </p>
-                  <Button variant="outline" className="w-full">
-                    <Icon name="Download" className="mr-2" size={16} />
-                    Скачать отчет
-                  </Button>
-                </div>
-
-                <div className="p-4 bg-card border border-border rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-semibold">Индивидуальный отчет</h4>
-                    <Badge variant="secondary">В разработке</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Персональные рекомендации на основе вашей активности
-                  </p>
-                  <Button variant="outline" className="w-full" disabled>
-                    <Icon name="Clock" className="mr-2" size={16} />
-                    Скоро доступно
-                  </Button>
-                </div>
-              </div>
-            </Card>
+          <TabsContent value="reports">
+            <ReportsTab />
           </TabsContent>
 
-          <TabsContent value="methodology" className="space-y-6">
-            <Card className="p-6">
-              <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <Icon name="BookOpen" size={24} />
-                Методические рекомендации
-              </h3>
-
-              <div className="space-y-6">
-                <div>
-                  <h4 className="font-semibold mb-2">Применение комплекса в офисе</h4>
-                  <p className="text-muted-foreground mb-4">
-                    Наш комплекс разработан специально для офисных условий и не требует специального оборудования.
-                    Все упражнения можно выполнять прямо на рабочем месте.
-                  </p>
-                </div>
-
-                <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg">
-                  <h5 className="font-semibold mb-2 flex items-center gap-2">
-                    <Icon name="AlertCircle" size={20} />
-                    Важные принципы
-                  </h5>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li className="flex gap-2">
-                      <span className="text-primary">•</span>
-                      Регулярность важнее интенсивности
-                    </li>
-                    <li className="flex gap-2">
-                      <span className="text-primary">•</span>
-                      Выполняйте упражнения каждые 2-3 часа
-                    </li>
-                    <li className="flex gap-2">
-                      <span className="text-primary">•</span>
-                      Не игнорируйте дискомфорт - подбирайте нагрузку индивидуально
-                    </li>
-                    <li className="flex gap-2">
-                      <span className="text-primary">•</span>
-                      Дышите ровно, не задерживайте дыхание
-                    </li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold mb-2">Рекомендации по внедрению</h4>
-                  <div className="space-y-3">
-                    <div className="p-4 bg-card border border-border rounded-lg">
-                      <h5 className="font-medium mb-1">Для сотрудников</h5>
-                      <p className="text-sm text-muted-foreground">
-                        Начните с 2-3 упражнений в день и постепенно увеличивайте количество. Используйте напоминания для формирования привычки.
-                      </p>
-                    </div>
-                    <div className="p-4 bg-card border border-border rounded-lg">
-                      <h5 className="font-medium mb-1">Для руководителей</h5>
-                      <p className="text-sm text-muted-foreground">
-                        Поощряйте сотрудников делать перерывы на упражнения. Организуйте групповые сессии 2-3 раза в неделю для повышения вовлеченности.
-                      </p>
-                    </div>
-                    <div className="p-4 bg-card border border-border rounded-lg">
-                      <h5 className="font-medium mb-1">Для HR-специалистов</h5>
-                      <p className="text-sm text-muted-foreground">
-                        Отслеживайте статистику участия, собирайте обратную связь и корректируйте программу под потребности команды.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold mb-2">Научное обоснование</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Комплекс разработан на основе исследований в области эргономики и профилактической медицины. Регулярное выполнение упражнений снижает риск профессиональных заболеваний на 45% и повышает продуктивность на 23%.
-                  </p>
-                </div>
-              </div>
-            </Card>
+          <TabsContent value="methodology">
+            <MethodologyTab />
           </TabsContent>
 
-          <TabsContent value="profile" className="space-y-6">
-            <Card className="p-6">
-              <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <Icon name="User" size={24} />
-                Профиль пользователя
-              </h3>
-
-              <div className="space-y-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center">
-                    <Icon name="User" size={40} className="text-primary" />
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-semibold">Сергей Иванов</h4>
-                    <p className="text-muted-foreground">sergey.ivanov@company.com</p>
-                  </div>
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="p-4 bg-card border border-border rounded-lg">
-                    <p className="text-sm text-muted-foreground mb-1">Должность</p>
-                    <p className="font-medium">Менеджер проектов</p>
-                  </div>
-                  <div className="p-4 bg-card border border-border rounded-lg">
-                    <p className="text-sm text-muted-foreground mb-1">Отдел</p>
-                    <p className="font-medium">IT-разработка</p>
-                  </div>
-                  <div className="p-4 bg-card border border-border rounded-lg">
-                    <p className="text-sm text-muted-foreground mb-1">Дата регистрации</p>
-                    <p className="font-medium">15 октября 2024</p>
-                  </div>
-                  <div className="p-4 bg-card border border-border rounded-lg">
-                    <p className="text-sm text-muted-foreground mb-1">Статус</p>
-                    <Badge>Активный участник</Badge>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold mb-4">Предпочтения</h4>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-4 bg-card border border-border rounded-lg">
-                      <div>
-                        <p className="font-medium">Уровень сложности</p>
-                        <p className="text-sm text-muted-foreground">Рекомендуемая нагрузка</p>
-                      </div>
-                      <Badge>Средний</Badge>
-                    </div>
-                    <div className="flex items-center justify-between p-4 bg-card border border-border rounded-lg">
-                      <div>
-                        <p className="font-medium">Проблемные зоны</p>
-                        <p className="text-sm text-muted-foreground">Области для особого внимания</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Badge variant="secondary">Шея</Badge>
-                        <Badge variant="secondary">Спина</Badge>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <Button className="w-full">
-                  <Icon name="Settings" className="mr-2" size={16} />
-                  Редактировать профиль
-                </Button>
-              </div>
-            </Card>
+          <TabsContent value="profile">
+            <ProfileTab />
           </TabsContent>
         </Tabs>
       </main>
