@@ -123,7 +123,7 @@ export default function Index() {
               <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
                 <Icon name="Heart" className="text-primary-foreground" size={24} />
               </div>
-              <h1 className="text-2xl font-bold text-foreground">Офисное Здоровье</h1>
+              <h1 className="text-2xl font-bold text-foreground">Зона роста</h1>
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right hidden sm:block">
