@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
@@ -8,6 +8,12 @@ import RemindersTab from '@/components/RemindersTab';
 import ProgressTab from '@/components/ProgressTab';
 import { ReportsTab, MethodologyTab, ProfileTab } from '@/components/OtherTabs';
 import FeedbackDialog from '@/components/FeedbackDialog';
+import {
+  requestNotificationPermission,
+  scheduleNotification,
+  cancelNotification,
+  getNotificationStatus,
+} from '@/utils/notifications';
 
 const exercises = [
   {
@@ -102,6 +108,7 @@ export default function Index() {
     position: 'Менеджер проектов',
     department: 'IT-разработка',
   });
+  const notificationTimeouts = useRef<Map<number, number>>(new Map());
 
   const toggleExercise = (id: number) => {
     const wasCompleted = completedExercises.includes(id);
@@ -152,11 +159,96 @@ export default function Index() {
   };
 
   const deleteReminder = (id: number) => {
+    const timeoutId = notificationTimeouts.current.get(id);
+    if (timeoutId) {
+      cancelNotification(timeoutId);
+      notificationTimeouts.current.delete(id);
+    }
     setReminderSettings((prev) => prev.filter((r) => r.id !== id));
     toast.success('Напоминание удалено');
   };
 
+  useEffect(() => {
+    const initNotifications = async () => {
+      if (pushNotifications) {
+        const status = getNotificationStatus();
+        if (status === 'default') {
+          const granted = await requestNotificationPermission();
+          if (granted) {
+            toast.success('Уведомления включены');
+          } else {
+            toast.error('Разрешите уведомления в настройках браузера');
+            setPushNotifications(false);
+          }
+        } else if (status === 'unsupported') {
+          toast.error('Ваш браузер не поддерживает уведомления');
+          setPushNotifications(false);
+        } else if (status === 'denied') {
+          toast.error('Уведомления заблокированы. Разрешите их в настройках браузера');
+          setPushNotifications(false);
+        }
+      }
+    };
+
+    initNotifications();
+  }, []);
+
+  useEffect(() => {
+    notificationTimeouts.current.forEach((timeoutId) => {
+      cancelNotification(timeoutId);
+    });
+    notificationTimeouts.current.clear();
+
+    if (pushNotifications && getNotificationStatus() === 'granted') {
+      reminderSettings.forEach((reminder) => {
+        if (reminder.active) {
+          const timeoutId = scheduleNotification(
+            reminder.time,
+            reminder.label,
+            reminder.description,
+            () => {
+              toast.info(`Время для: ${reminder.label}`);
+              const newTimeoutId = scheduleNotification(
+                reminder.time,
+                reminder.label,
+                reminder.description
+              );
+              if (newTimeoutId !== null) {
+                notificationTimeouts.current.set(reminder.id, newTimeoutId);
+              }
+            }
+          );
+          if (timeoutId !== null) {
+            notificationTimeouts.current.set(reminder.id, timeoutId);
+          }
+        }
+      });
+    }
+
+    return () => {
+      notificationTimeouts.current.forEach((timeoutId) => {
+        cancelNotification(timeoutId);
+      });
+      notificationTimeouts.current.clear();
+    };
+  }, [reminderSettings, pushNotifications]);
+
   const totalProgress = (completedExercises.length / exercises.length) * 100;
+
+  const handlePushNotificationsChange = async (enabled: boolean) => {
+    if (enabled) {
+      const granted = await requestNotificationPermission();
+      if (granted) {
+        setPushNotifications(true);
+        toast.success('Уведомления включены');
+      } else {
+        toast.error('Разрешите уведомления в настройках браузера');
+      }
+    } else {
+      setPushNotifications(false);
+      toast.info('Уведомления отключены');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -230,7 +322,7 @@ export default function Index() {
               emailNotifications={emailNotifications}
               pushNotifications={pushNotifications}
               setEmailNotifications={setEmailNotifications}
-              setPushNotifications={setPushNotifications}
+              setPushNotifications={handlePushNotificationsChange}
               toggleReminder={toggleReminder}
               updateReminderTime={updateReminderTime}
               addReminder={addReminder}
