@@ -7,6 +7,7 @@ import ExercisesTab from '@/components/ExercisesTab';
 import RemindersTab from '@/components/RemindersTab';
 import ProgressTab from '@/components/ProgressTab';
 import { ReportsTab, MethodologyTab, ProfileTab } from '@/components/OtherTabs';
+import FeedbackDialog from '@/components/FeedbackDialog';
 
 const exercises = [
   {
@@ -93,14 +94,29 @@ export default function Index() {
   const [reminderSettings, setReminderSettings] = useState(reminders);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(true);
+  const [feedbackDialog, setFeedbackDialog] = useState<{ open: boolean; exerciseId: number | null }>({ open: false, exerciseId: null });
+  const [exerciseFeedback, setExerciseFeedback] = useState<Record<number, { rating: number; comment: string; difficulty: string }>>({});
 
   const toggleExercise = (id: number) => {
-    setCompletedExercises((prev) =>
-      prev.includes(id) ? prev.filter((exerciseId) => exerciseId !== id) : [...prev, id]
-    );
-    toast.success(
-      completedExercises.includes(id) ? 'Упражнение убрано из выполненных' : 'Упражнение выполнено! 🎉'
-    );
+    const wasCompleted = completedExercises.includes(id);
+    
+    if (wasCompleted) {
+      setCompletedExercises((prev) => prev.filter((exerciseId) => exerciseId !== id));
+      toast.success('Упражнение убрано из выполненных');
+    } else {
+      setCompletedExercises((prev) => [...prev, id]);
+      setFeedbackDialog({ open: true, exerciseId: id });
+    }
+  };
+
+  const handleFeedbackSubmit = (feedback: { rating: number; comment: string; difficulty: string }) => {
+    if (feedbackDialog.exerciseId) {
+      setExerciseFeedback((prev) => ({
+        ...prev,
+        [feedbackDialog.exerciseId!]: feedback,
+      }));
+      toast.success('Спасибо за отзыв! 🎉');
+    }
   };
 
   const toggleReminder = (id: number) => {
@@ -212,6 +228,15 @@ export default function Index() {
           </TabsContent>
         </Tabs>
       </main>
+
+      <FeedbackDialog
+        isOpen={feedbackDialog.open}
+        onClose={() => setFeedbackDialog({ open: false, exerciseId: null })}
+        exerciseTitle={
+          exercises.find((ex) => ex.id === feedbackDialog.exerciseId)?.title || ''
+        }
+        onSubmit={handleFeedbackSubmit}
+      />
     </div>
   );
 }
