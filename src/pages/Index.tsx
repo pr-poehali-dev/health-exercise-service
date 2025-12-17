@@ -96,6 +96,12 @@ export default function Index() {
   const [pushNotifications, setPushNotifications] = useState(true);
   const [feedbackDialog, setFeedbackDialog] = useState<{ open: boolean; exerciseId: number | null }>({ open: false, exerciseId: null });
   const [exerciseFeedback, setExerciseFeedback] = useState<Record<number, { rating: number; comment: string; difficulty: string }>>({});
+  const [userProfile, setUserProfile] = useState({
+    name: 'Сергей Иванов',
+    email: 'sergey.ivanov@company.com',
+    position: 'Менеджер проектов',
+    department: 'IT-разработка',
+  });
 
   const toggleExercise = (id: number) => {
     const wasCompleted = completedExercises.includes(id);
@@ -146,7 +152,7 @@ export default function Index() {
                 <p className="text-sm text-muted-foreground">Прогресс дня</p>
                 <p className="text-lg font-semibold text-primary">{completedExercises.length}/{exercises.length}</p>
               </div>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => setActiveTab('profile')}>
                 <Icon name="User" className="mr-2" size={16} />
                 Профиль
               </Button>
@@ -224,7 +230,7 @@ export default function Index() {
           </TabsContent>
 
           <TabsContent value="profile">
-            <ProfileTab />
+            <ProfileTab userProfile={userProfile} onProfileUpdate={setUserProfile} />
           </TabsContent>
         </Tabs>
       </main>

@@ -1,7 +1,11 @@
+import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import Icon from '@/components/ui/icon';
+import { toast } from 'sonner';
 
 export function ReportsTab() {
   return (
@@ -142,14 +146,52 @@ export function MethodologyTab() {
   );
 }
 
-export function ProfileTab() {
+interface ProfileTabProps {
+  userProfile: {
+    name: string;
+    email: string;
+    position: string;
+    department: string;
+  };
+  onProfileUpdate: (profile: { name: string; email: string; position: string; department: string }) => void;
+}
+
+export function ProfileTab({ userProfile, onProfileUpdate }: ProfileTabProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState(userProfile);
+
+  const registrationDate = new Date().toLocaleDateString('ru-RU', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+
+  const handleSave = () => {
+    onProfileUpdate(formData);
+    setIsEditing(false);
+    toast.success('Профиль обновлен');
+  };
+
+  const handleCancel = () => {
+    setFormData(userProfile);
+    setIsEditing(false);
+  };
+
   return (
     <div className="space-y-6">
       <Card className="p-6">
-        <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-          <Icon name="User" size={24} />
-          Профиль пользователя
-        </h3>
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-semibold flex items-center gap-2">
+            <Icon name="User" size={24} />
+            Профиль пользователя
+          </h3>
+          {!isEditing && (
+            <Button onClick={() => setIsEditing(true)} variant="outline">
+              <Icon name="Pencil" className="mr-2" size={16} />
+              Редактировать
+            </Button>
+          )}
+        </div>
 
         <div className="space-y-6">
           <div className="flex items-center gap-4">
@@ -157,29 +199,74 @@ export function ProfileTab() {
               <Icon name="User" size={40} className="text-primary" />
             </div>
             <div>
-              <h4 className="text-xl font-semibold">Сергей Иванов</h4>
-              <p className="text-muted-foreground">sergey.ivanov@company.com</p>
+              {isEditing ? (
+                <div className="space-y-2">
+                  <Input
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="font-semibold text-xl"
+                  />
+                  <Input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="text-muted-foreground"
+                  />
+                </div>
+              ) : (
+                <>
+                  <h4 className="text-xl font-semibold">{userProfile.name}</h4>
+                  <p className="text-muted-foreground">{userProfile.email}</p>
+                </>
+              )}
             </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="p-4 bg-card border border-border rounded-lg">
-              <p className="text-sm text-muted-foreground mb-1">Должность</p>
-              <p className="font-medium">Менеджер проектов</p>
+              <Label className="text-sm text-muted-foreground mb-2 block">Должность</Label>
+              {isEditing ? (
+                <Input
+                  value={formData.position}
+                  onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                />
+              ) : (
+                <p className="font-medium">{userProfile.position}</p>
+              )}
             </div>
             <div className="p-4 bg-card border border-border rounded-lg">
-              <p className="text-sm text-muted-foreground mb-1">Отдел</p>
-              <p className="font-medium">IT-разработка</p>
+              <Label className="text-sm text-muted-foreground mb-2 block">Отдел</Label>
+              {isEditing ? (
+                <Input
+                  value={formData.department}
+                  onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                />
+              ) : (
+                <p className="font-medium">{userProfile.department}</p>
+              )}
             </div>
             <div className="p-4 bg-card border border-border rounded-lg">
               <p className="text-sm text-muted-foreground mb-1">Дата регистрации</p>
-              <p className="font-medium">15 октября 2024</p>
+              <p className="font-medium">{registrationDate}</p>
             </div>
             <div className="p-4 bg-card border border-border rounded-lg">
               <p className="text-sm text-muted-foreground mb-1">Статус</p>
               <Badge>Активный участник</Badge>
             </div>
           </div>
+
+          {isEditing && (
+            <div className="flex gap-3">
+              <Button onClick={handleSave} className="flex-1">
+                <Icon name="Check" className="mr-2" size={16} />
+                Сохранить
+              </Button>
+              <Button onClick={handleCancel} variant="outline" className="flex-1">
+                <Icon name="X" className="mr-2" size={16} />
+                Отмена
+              </Button>
+            </div>
+          )}
 
           <div>
             <h4 className="font-semibold mb-4">Предпочтения</h4>
@@ -197,17 +284,33 @@ export function ProfileTab() {
                   <p className="text-sm text-muted-foreground">Области для особого внимания</p>
                 </div>
                 <div className="flex gap-2">
-                  <Badge variant="secondary">Шея</Badge>
                   <Badge variant="secondary">Спина</Badge>
+                  <Badge variant="secondary">Шея</Badge>
                 </div>
               </div>
             </div>
           </div>
 
-          <Button className="w-full">
-            <Icon name="Settings" className="mr-2" size={16} />
-            Редактировать профиль
-          </Button>
+          <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg">
+            <h5 className="font-semibold mb-2 flex items-center gap-2">
+              <Icon name="TrendingUp" size={20} />
+              Ваши достижения
+            </h5>
+            <div className="grid gap-3 md:grid-cols-3 mt-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-primary">42</div>
+                <div className="text-sm text-muted-foreground">Упражнений выполнено</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-primary">7</div>
+                <div className="text-sm text-muted-foreground">Дней подряд</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-primary">85%</div>
+                <div className="text-sm text-muted-foreground">Средний прогресс</div>
+              </div>
+            </div>
+          </div>
         </div>
       </Card>
     </div>
