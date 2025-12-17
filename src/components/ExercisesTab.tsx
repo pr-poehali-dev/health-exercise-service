@@ -1,8 +1,16 @@
+import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 interface Exercise {
   id: number;
@@ -13,6 +21,7 @@ interface Exercise {
   videoUrl: string;
   description: string;
   benefits: string[];
+  detailedInfo?: string;
 }
 
 interface ExercisesTabProps {
@@ -28,6 +37,16 @@ export default function ExercisesTab({
   toggleExercise,
   totalProgress,
 }: ExercisesTabProps) {
+  const [infoDialog, setInfoDialog] = useState<{ open: boolean; exercise: Exercise | null }>({
+    open: false,
+    exercise: null,
+  });
+
+  const handleInfoClick = (e: React.MouseEvent, exercise: Exercise) => {
+    e.stopPropagation();
+    setInfoDialog({ open: true, exercise });
+  };
+
   return (
     <div className="space-y-6">
       <Card className="p-6 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
@@ -99,14 +118,71 @@ export default function ExercisesTab({
                 </ul>
               </div>
 
-              <Button className="w-full mt-4" variant={isCompleted ? 'outline' : 'default'}>
-                <Icon name="Play" className="mr-2" size={16} />
-                {isCompleted ? 'Повторить' : 'Начать упражнение'}
-              </Button>
+              <div className="flex gap-2 mt-4">
+                <Button className="flex-1" variant={isCompleted ? 'outline' : 'default'}>
+                  <Icon name="Play" className="mr-2" size={16} />
+                  {isCompleted ? 'Повторить' : 'Начать упражнение'}
+                </Button>
+                {exercise.detailedInfo && (
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={(e) => handleInfoClick(e, exercise)}
+                  >
+                    <Icon name="Info" size={16} />
+                  </Button>
+                )}
+              </div>
             </Card>
           );
         })}
       </div>
+
+      <Dialog open={infoDialog.open} onOpenChange={(open) => setInfoDialog({ open, exercise: null })}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Icon name="Info" size={24} className="text-primary" />
+              {infoDialog.exercise?.title}
+            </DialogTitle>
+            <DialogDescription>
+              Подробная инструкция по выполнению упражнения
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {infoDialog.exercise?.detailedInfo && (
+              <div className="prose prose-sm max-w-none">
+                {infoDialog.exercise.detailedInfo.split('\n').map((line, index) => (
+                  <p key={index} className="mb-2 text-foreground">
+                    {line}
+                  </p>
+                ))}
+              </div>
+            )}
+            <div className="flex items-center gap-4 text-sm text-muted-foreground pt-4 border-t">
+              <div className="flex items-center gap-1">
+                <Icon name="Clock" size={16} />
+                {infoDialog.exercise?.duration}
+              </div>
+              <div className="flex items-center gap-1">
+                <Icon name="Tag" size={16} />
+                {infoDialog.exercise?.category}
+              </div>
+              <Badge
+                variant={
+                  infoDialog.exercise?.difficulty === 'Легко'
+                    ? 'secondary'
+                    : infoDialog.exercise?.difficulty === 'Средне'
+                    ? 'default'
+                    : 'destructive'
+                }
+              >
+                {infoDialog.exercise?.difficulty}
+              </Badge>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
