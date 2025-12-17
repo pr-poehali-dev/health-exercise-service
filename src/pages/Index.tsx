@@ -73,9 +73,9 @@ const exercises = [
 ];
 
 const reminders = [
-  { id: 1, time: '10:00', active: true, label: 'Утренняя разминка', description: 'Разминка шеи и плеч' },
-  { id: 2, time: '14:00', active: true, label: 'Обеденная гимнастика', description: 'Растяжка спины' },
-  { id: 3, time: '17:00', active: false, label: 'Вечерняя растяжка', description: 'Упражнения для ног' },
+  { id: 1, time: '10:00', active: true, label: 'Утренняя разминка', description: 'Разминка шеи и плеч', isPinned: true },
+  { id: 2, time: '14:00', active: true, label: 'Обеденная гимнастика', description: 'Растяжка спины', isPinned: true },
+  { id: 3, time: '17:00', active: true, label: 'Вечерняя растяжка', description: 'Упражнения для ног', isPinned: true },
 ];
 
 const weeklyStats = [
@@ -134,6 +134,28 @@ export default function Index() {
     toast.success('Настройки напоминания обновлены');
   };
 
+  const updateReminderTime = (id: number, time: string) => {
+    setReminderSettings((prev) =>
+      prev.map((reminder) =>
+        reminder.id === id ? { ...reminder, time } : reminder
+      )
+    );
+    toast.success('Время напоминания изменено');
+  };
+
+  const addReminder = (reminder: { label: string; description: string; time: string }) => {
+    const newId = Math.max(...reminderSettings.map((r) => r.id), 0) + 1;
+    setReminderSettings((prev) => [
+      ...prev,
+      { id: newId, ...reminder, active: true, isPinned: false },
+    ]);
+  };
+
+  const deleteReminder = (id: number) => {
+    setReminderSettings((prev) => prev.filter((r) => r.id !== id));
+    toast.success('Напоминание удалено');
+  };
+
   const totalProgress = (completedExercises.length / exercises.length) * 100;
 
   return (
@@ -170,7 +192,7 @@ export default function Index() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 bg-card border border-border">
+          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-5 bg-card border border-border">
             <TabsTrigger value="exercises" className="gap-2">
               <Icon name="Dumbbell" size={16} />
               <span className="hidden sm:inline">Упражнения</span>
@@ -191,10 +213,6 @@ export default function Index() {
               <Icon name="BookOpen" size={16} />
               <span className="hidden sm:inline">Методика</span>
             </TabsTrigger>
-            <TabsTrigger value="profile" className="gap-2">
-              <Icon name="Settings" size={16} />
-              <span className="hidden sm:inline">Настройки</span>
-            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="exercises">
@@ -214,6 +232,9 @@ export default function Index() {
               setEmailNotifications={setEmailNotifications}
               setPushNotifications={setPushNotifications}
               toggleReminder={toggleReminder}
+              updateReminderTime={updateReminderTime}
+              addReminder={addReminder}
+              deleteReminder={deleteReminder}
             />
           </TabsContent>
 
