@@ -335,6 +335,10 @@ export default function Index() {
                 <p className="text-sm text-muted-foreground">Прогресс дня</p>
                 <p className="text-lg font-semibold text-primary">{completedExercises.length}/{exercises.length}</p>
               </div>
+              <Button variant="outline" size="sm" onClick={() => setActiveTab('profile')}>
+                <Icon name="User" className="mr-2" size={16} />
+                Профиль
+              </Button>
               <Button variant="outline" size="sm" onClick={auth.logout}>
                 <Icon name="LogOut" className="mr-2" size={16} />
                 Выход
@@ -353,7 +357,7 @@ export default function Index() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-5 bg-card border border-border">
+          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 bg-card border border-border">
             <TabsTrigger value="exercises" className="gap-2">
               <Icon name="Dumbbell" size={16} />
               <span className="hidden sm:inline">Упражнения</span>
@@ -373,6 +377,10 @@ export default function Index() {
             <TabsTrigger value="methodology" className="gap-2">
               <Icon name="BookOpen" size={16} />
               <span className="hidden sm:inline">Методика</span>
+            </TabsTrigger>
+            <TabsTrigger value="profile" className="gap-2">
+              <Icon name="User" size={16} />
+              <span className="hidden sm:inline">Профиль</span>
             </TabsTrigger>
           </TabsList>
 
@@ -412,7 +420,7 @@ export default function Index() {
           </TabsContent>
 
           <TabsContent value="profile">
-            <ProfileTab userProfile={userProfile} onProfileUpdate={setUserProfile} />
+            <ProfileTab user={auth.user!} onLogout={auth.logout} />
           </TabsContent>
         </Tabs>
       </main>

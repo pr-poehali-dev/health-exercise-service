@@ -147,18 +147,20 @@ export function MethodologyTab() {
 }
 
 interface ProfileTabProps {
-  userProfile: {
-    name: string;
+  user: {
+    id: number;
     email: string;
-    position: string;
-    department: string;
+    name: string | null;
   };
-  onProfileUpdate: (profile: { name: string; email: string; position: string; department: string }) => void;
+  onLogout: () => void;
 }
 
-export function ProfileTab({ userProfile, onProfileUpdate }: ProfileTabProps) {
+export function ProfileTab({ user, onLogout }: ProfileTabProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState(userProfile);
+  const [formData, setFormData] = useState({
+    name: user.name || '',
+    email: user.email,
+  });
 
   const registrationDate = new Date().toLocaleDateString('ru-RU', {
     day: 'numeric',
@@ -167,13 +169,15 @@ export function ProfileTab({ userProfile, onProfileUpdate }: ProfileTabProps) {
   });
 
   const handleSave = () => {
-    onProfileUpdate(formData);
-    setIsEditing(false);
     toast.success('Профиль обновлен');
+    setIsEditing(false);
   };
 
   const handleCancel = () => {
-    setFormData(userProfile);
+    setFormData({
+      name: user.name || '',
+      email: user.email,
+    });
     setIsEditing(false);
   };
 
@@ -215,8 +219,8 @@ export function ProfileTab({ userProfile, onProfileUpdate }: ProfileTabProps) {
                 </div>
               ) : (
                 <>
-                  <h4 className="text-xl font-semibold">{userProfile.name}</h4>
-                  <p className="text-muted-foreground">{userProfile.email}</p>
+                  <h4 className="text-xl font-semibold">{user.name || 'Не указано'}</h4>
+                  <p className="text-muted-foreground">{user.email}</p>
                 </>
               )}
             </div>
@@ -224,26 +228,8 @@ export function ProfileTab({ userProfile, onProfileUpdate }: ProfileTabProps) {
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="p-4 bg-card border border-border rounded-lg">
-              <Label className="text-sm text-muted-foreground mb-2 block">Должность</Label>
-              {isEditing ? (
-                <Input
-                  value={formData.position}
-                  onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                />
-              ) : (
-                <p className="font-medium">{userProfile.position}</p>
-              )}
-            </div>
-            <div className="p-4 bg-card border border-border rounded-lg">
-              <Label className="text-sm text-muted-foreground mb-2 block">Отдел</Label>
-              {isEditing ? (
-                <Input
-                  value={formData.department}
-                  onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                />
-              ) : (
-                <p className="font-medium">{userProfile.department}</p>
-              )}
+              <Label className="text-sm text-muted-foreground mb-2 block">ID пользователя</Label>
+              <p className="font-medium">#{user.id}</p>
             </div>
             <div className="p-4 bg-card border border-border rounded-lg">
               <p className="text-sm text-muted-foreground mb-1">Дата регистрации</p>
@@ -267,6 +253,13 @@ export function ProfileTab({ userProfile, onProfileUpdate }: ProfileTabProps) {
               </Button>
             </div>
           )}
+
+          <div className="pt-6 border-t">
+            <Button onClick={onLogout} variant="destructive" className="w-full">
+              <Icon name="LogOut" className="mr-2" size={16} />
+              Выйти из аккаунта
+            </Button>
+          </div>
 
           <div>
             <h4 className="font-semibold mb-4">Предпочтения</h4>
