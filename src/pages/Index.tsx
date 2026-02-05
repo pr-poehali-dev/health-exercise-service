@@ -8,6 +8,10 @@ import RemindersTab from '@/components/RemindersTab';
 import ProgressTab from '@/components/ProgressTab';
 import { ReportsTab, MethodologyTab, ProfileTab } from '@/components/OtherTabs';
 import FeedbackDialog from '@/components/FeedbackDialog';
+import LoginForm from '@/components/extensions/auth-email/LoginForm';
+import RegisterForm from '@/components/extensions/auth-email/RegisterForm';
+import UserProfile from '@/components/extensions/auth-email/UserProfile';
+import { useAuth } from '@/components/extensions/auth-email/useAuth';
 import {
   requestNotificationPermission,
   scheduleNotification,
@@ -100,7 +104,10 @@ const weeklyStats = [
   { day: 'Вс', completed: 0, total: 0 },
 ];
 
+const AUTH_URL = 'https://functions.poehali.dev/02d0570f-68d2-4b2a-89e7-43d12569640b';
+
 export default function Index() {
+  const [showRegister, setShowRegister] = useState(false);
   const [activeTab, setActiveTab] = useState('exercises');
   const [completedExercises, setCompletedExercises] = useState<number[]>([1, 2]);
   const [reminderSettings, setReminderSettings] = useState(reminders);
@@ -115,6 +122,17 @@ export default function Index() {
     department: 'IT-разработка',
   });
   const notificationTimeouts = useRef<Map<number, number>>(new Map());
+
+  const auth = useAuth({
+    apiUrls: {
+      login: `${AUTH_URL}?action=login`,
+      register: `${AUTH_URL}?action=register`,
+      verifyEmail: `${AUTH_URL}?action=verify-email`,
+      refresh: `${AUTH_URL}?action=refresh`,
+      logout: `${AUTH_URL}?action=logout`,
+      resetPassword: `${AUTH_URL}?action=reset-password`,
+    },
+  });
 
   const toggleExercise = (id: number) => {
     const wasCompleted = completedExercises.includes(id);
@@ -256,6 +274,52 @@ export default function Index() {
     }
   };
 
+  if (auth.isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Загрузка...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!auth.isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center mx-auto mb-4">
+              <Icon name="Heart" className="text-primary-foreground" size={32} />
+            </div>
+            <h1 className="text-3xl font-bold mb-2">Зона роста</h1>
+            <p className="text-muted-foreground">Комплекс оздоровительных упражнений для офиса</p>
+          </div>
+
+          {showRegister ? (
+            <RegisterForm
+              onRegister={auth.register}
+              onVerifyEmail={auth.verifyEmail}
+              isLoading={auth.isLoading}
+              error={auth.error}
+              onSwitchToLogin={() => setShowRegister(false)}
+            />
+          ) : (
+            <LoginForm
+              onLogin={auth.login}
+              onRequestPasswordReset={auth.requestPasswordReset}
+              onResetPassword={auth.resetPassword}
+              isLoading={auth.isLoading}
+              error={auth.error}
+              onSwitchToRegister={() => setShowRegister(true)}
+            />
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
@@ -272,9 +336,9 @@ export default function Index() {
                 <p className="text-sm text-muted-foreground">Прогресс дня</p>
                 <p className="text-lg font-semibold text-primary">{completedExercises.length}/{exercises.length}</p>
               </div>
-              <Button variant="outline" size="sm" onClick={() => setActiveTab('profile')}>
-                <Icon name="User" className="mr-2" size={16} />
-                Профиль
+              <Button variant="outline" size="sm" onClick={auth.logout}>
+                <Icon name="LogOut" className="mr-2" size={16} />
+                Выход
               </Button>
             </div>
           </div>
