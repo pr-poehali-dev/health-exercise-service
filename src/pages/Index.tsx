@@ -301,18 +301,17 @@ export default function Index() {
             <RegisterForm
               onRegister={auth.register}
               onVerifyEmail={auth.verifyEmail}
+              onLogin={auth.login}
               isLoading={auth.isLoading}
               error={auth.error}
-              onSwitchToLogin={() => setShowRegister(false)}
+              onLoginClick={() => setShowRegister(false)}
             />
           ) : (
             <LoginForm
               onLogin={auth.login}
-              onRequestPasswordReset={auth.requestPasswordReset}
-              onResetPassword={auth.resetPassword}
               isLoading={auth.isLoading}
               error={auth.error}
-              onSwitchToRegister={() => setShowRegister(true)}
+              onRegisterClick={() => setShowRegister(true)}
             />
           )}
         </div>
