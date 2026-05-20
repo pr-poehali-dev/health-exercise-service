@@ -154,7 +154,7 @@ export default function AppLayout({
           </TabsContent>
 
           <TabsContent value="reports">
-            <ReportsTab />
+            <ReportsTab completedCount={completedExercises.length} />
           </TabsContent>
 
           <TabsContent value="methodology">
@@ -162,7 +162,7 @@ export default function AppLayout({
           </TabsContent>
 
           <TabsContent value="profile">
-            <ProfileTab user={user} onLogout={logout} />
+            <ProfileTab user={user} onLogout={logout} completedCount={completedExercises.length} />
           </TabsContent>
         </Tabs>
       </main>

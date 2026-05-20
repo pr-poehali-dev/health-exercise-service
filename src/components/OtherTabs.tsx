@@ -7,7 +7,11 @@ import { Label } from '@/components/ui/label';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
 
-export function ReportsTab() {
+interface ReportsTabProps {
+  completedCount?: number;
+}
+
+export function ReportsTab({ completedCount = 0 }: ReportsTabProps) {
   return (
     <div className="space-y-6">
       <Card className="p-6">
@@ -18,6 +22,21 @@ export function ReportsTab() {
         <p className="text-muted-foreground mb-6">
           Детальная отчетность по выполнению программы
         </p>
+
+        <div className="grid gap-4 md:grid-cols-3 mb-6">
+          <div className="p-4 bg-card border border-border rounded-lg text-center">
+            <div className="text-2xl font-bold text-primary">{completedCount}</div>
+            <div className="text-sm text-muted-foreground">Выполнено сегодня</div>
+          </div>
+          <div className="p-4 bg-card border border-border rounded-lg text-center">
+            <div className="text-2xl font-bold text-primary">0</div>
+            <div className="text-sm text-muted-foreground">Выполнено за неделю</div>
+          </div>
+          <div className="p-4 bg-card border border-border rounded-lg text-center">
+            <div className="text-2xl font-bold text-primary">{completedCount === 0 ? '0%' : Math.round((completedCount / 6) * 100) + '%'}</div>
+            <div className="text-sm text-muted-foreground">Прогресс дня</div>
+          </div>
+        </div>
 
         <div className="space-y-4">
           <div className="p-4 bg-card border border-border rounded-lg">
@@ -148,14 +167,15 @@ export function MethodologyTab() {
 
 interface ProfileTabProps {
   user: {
-    id: number;
+    id?: number;
     email: string;
     name: string | null;
   };
   onLogout: () => void;
+  completedCount?: number;
 }
 
-export function ProfileTab({ user, onLogout }: ProfileTabProps) {
+export function ProfileTab({ user, onLogout, completedCount = 0 }: ProfileTabProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: user.name || '',
@@ -229,7 +249,7 @@ export function ProfileTab({ user, onLogout }: ProfileTabProps) {
           <div className="grid gap-4 md:grid-cols-2">
             <div className="p-4 bg-card border border-border rounded-lg">
               <Label className="text-sm text-muted-foreground mb-2 block">ID пользователя</Label>
-              <p className="font-medium">#{user.id}</p>
+              <p className="font-medium">#{user.id ?? 1}</p>
             </div>
             <div className="p-4 bg-card border border-border rounded-lg">
               <p className="text-sm text-muted-foreground mb-1">Дата регистрации</p>
@@ -291,16 +311,16 @@ export function ProfileTab({ user, onLogout }: ProfileTabProps) {
             </h5>
             <div className="grid gap-3 md:grid-cols-3 mt-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-primary">42</div>
+                <div className="text-2xl font-bold text-primary">{completedCount}</div>
                 <div className="text-sm text-muted-foreground">Упражнений выполнено</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-primary">7</div>
+                <div className="text-2xl font-bold text-primary">0</div>
                 <div className="text-sm text-muted-foreground">Дней подряд</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-primary">85%</div>
-                <div className="text-sm text-muted-foreground">Средний прогресс</div>
+                <div className="text-2xl font-bold text-primary">{completedCount === 0 ? '0%' : Math.round((completedCount / 6) * 100) + '%'}</div>
+                <div className="text-sm text-muted-foreground">Прогресс сегодня</div>
               </div>
             </div>
           </div>
