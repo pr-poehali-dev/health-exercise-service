@@ -74,11 +74,11 @@ export const reminders = [
 ];
 
 export const weeklyStats = [
-  { day: 'Пн', completed: 3, total: 4 },
-  { day: 'Вт', completed: 4, total: 4 },
-  { day: 'Ср', completed: 2, total: 4 },
-  { day: 'Чт', completed: 4, total: 4 },
-  { day: 'Пт', completed: 3, total: 4 },
+  { day: 'Пн', completed: 0, total: 0 },
+  { day: 'Вт', completed: 0, total: 0 },
+  { day: 'Ср', completed: 0, total: 0 },
+  { day: 'Чт', completed: 0, total: 0 },
+  { day: 'Пт', completed: 0, total: 0 },
   { day: 'Сб', completed: 0, total: 0 },
   { day: 'Вс', completed: 0, total: 0 },
 ];
