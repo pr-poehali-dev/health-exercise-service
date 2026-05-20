@@ -150,7 +150,7 @@ export default function AppLayout({
           </TabsContent>
 
           <TabsContent value="progress">
-            <ProgressTab weeklyStats={weeklyStats} />
+            <ProgressTab weeklyStats={weeklyStats} completedCount={completedExercises.length} />
           </TabsContent>
 
           <TabsContent value="reports">

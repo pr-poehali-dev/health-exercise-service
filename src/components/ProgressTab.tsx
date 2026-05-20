@@ -9,9 +9,10 @@ interface WeeklyStat {
 
 interface ProgressTabProps {
   weeklyStats: WeeklyStat[];
+  completedCount?: number;
 }
 
-export default function ProgressTab({ weeklyStats }: ProgressTabProps) {
+export default function ProgressTab({ weeklyStats, completedCount = 0 }: ProgressTabProps) {
   return (
     <div className="space-y-6">
       <Card className="p-6">
@@ -23,17 +24,17 @@ export default function ProgressTab({ weeklyStats }: ProgressTabProps) {
         <div className="grid gap-4 md:grid-cols-3 mb-8">
           <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
             <p className="text-sm text-muted-foreground mb-1">Всего выполнено</p>
-            <p className="text-3xl font-bold text-primary">64</p>
+            <p className="text-3xl font-bold text-primary">{completedCount}</p>
             <p className="text-xs text-muted-foreground mt-1">упражнений</p>
           </div>
           <div className="p-4 bg-card rounded-lg border border-border">
             <p className="text-sm text-muted-foreground mb-1">Текущая серия</p>
-            <p className="text-3xl font-bold">4</p>
-            <p className="text-xs text-muted-foreground mt-1">дня подряд</p>
+            <p className="text-3xl font-bold">0</p>
+            <p className="text-xs text-muted-foreground mt-1">дней подряд</p>
           </div>
           <div className="p-4 bg-card rounded-lg border border-border">
             <p className="text-sm text-muted-foreground mb-1">Среднее в день</p>
-            <p className="text-3xl font-bold">3.2</p>
+            <p className="text-3xl font-bold">{completedCount}</p>
             <p className="text-xs text-muted-foreground mt-1">упражнений</p>
           </div>
         </div>
