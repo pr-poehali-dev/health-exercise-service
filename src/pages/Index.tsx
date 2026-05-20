@@ -15,7 +15,7 @@ export default function Index() {
   const auth = useAppAuth();
 
   const [activeTab, setActiveTab] = useState('exercises');
-  const [completedExercises, setCompletedExercises] = useState<number[]>([1, 2]);
+  const [completedExercises, setCompletedExercises] = useState<number[]>([]);
   const [reminderSettings, setReminderSettings] = useState(reminders);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(true);
