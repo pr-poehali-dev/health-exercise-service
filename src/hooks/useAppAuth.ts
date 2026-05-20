@@ -23,15 +23,15 @@ export function useAppAuth() {
     : null;
 
   const login = async (payload: { email: string; password: string }) => {
-    if (payload.email === 'artem' && payload.password === 'artem') {
-      localStorage.setItem('auth_user', payload.email);
-      localStorage.setItem('auth_name', 'Артём');
-      setLoginError(null);
-      setIsAuthenticated(true);
-      return true;
+    if (!payload.email || !payload.password) {
+      setLoginError('Введите email и пароль');
+      return false;
     }
-    setLoginError('Неверный логин или пароль');
-    return false;
+    localStorage.setItem('auth_user', payload.email);
+    localStorage.setItem('auth_name', payload.email.split('@')[0]);
+    setLoginError(null);
+    setIsAuthenticated(true);
+    return true;
   };
 
   const logout = () => {
