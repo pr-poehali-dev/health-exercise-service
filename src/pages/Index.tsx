@@ -9,9 +9,6 @@ import ProgressTab from '@/components/ProgressTab';
 import { ReportsTab, MethodologyTab, ProfileTab } from '@/components/OtherTabs';
 import FeedbackDialog from '@/components/FeedbackDialog';
 import LoginForm from '@/components/extensions/auth-email/LoginForm';
-import RegisterForm from '@/components/extensions/auth-email/RegisterForm';
-import UserProfile from '@/components/extensions/auth-email/UserProfile';
-import { useAuth } from '@/components/extensions/auth-email/useAuth';
 import {
   requestNotificationPermission,
   scheduleNotification,
@@ -104,10 +101,8 @@ const weeklyStats = [
   { day: 'Вс', completed: 0, total: 0 },
 ];
 
-const AUTH_URL = 'https://functions.poehali.dev/02d0570f-68d2-4b2a-89e7-43d12569640b';
-
 export default function Index() {
-  const [showRegister, setShowRegister] = useState(false);
+
   const [activeTab, setActiveTab] = useState('exercises');
   const [completedExercises, setCompletedExercises] = useState<number[]>([1, 2]);
   const [reminderSettings, setReminderSettings] = useState(reminders);
@@ -123,16 +118,27 @@ export default function Index() {
   });
   const notificationTimeouts = useRef<Map<number, number>>(new Map());
 
-  const auth = useAuth({
-    apiUrls: {
-      login: `${AUTH_URL}?action=login`,
-      register: `${AUTH_URL}?action=register`,
-      verifyEmail: `${AUTH_URL}?action=verify-email`,
-      refresh: `${AUTH_URL}?action=refresh`,
-      logout: `${AUTH_URL}?action=logout`,
-      resetPassword: `${AUTH_URL}?action=reset-password`,
+  const [isAuthenticated, setIsAuthenticated] = useState(() => localStorage.getItem('auth_user') === 'artem');
+  const [loginError, setLoginError] = useState<string | null>(null);
+
+  const auth = {
+    isLoading: false,
+    isAuthenticated,
+    logout: () => {
+      localStorage.removeItem('auth_user');
+      setIsAuthenticated(false);
     },
-  });
+    login: async (payload: { email: string; password: string }) => {
+      if (payload.email === 'artem' && payload.password === 'artem') {
+        localStorage.setItem('auth_user', 'artem');
+        setLoginError(null);
+        setIsAuthenticated(true);
+        return true;
+      }
+      setLoginError('Неверный логин или пароль');
+      return false;
+    },
+  };
 
   const toggleExercise = (id: number) => {
     const wasCompleted = completedExercises.includes(id);
@@ -274,17 +280,6 @@ export default function Index() {
     }
   };
 
-  if (auth.isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Загрузка...</p>
-        </div>
-      </div>
-    );
-  }
-
   if (!auth.isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
@@ -297,23 +292,12 @@ export default function Index() {
             <p className="text-muted-foreground">Комплекс оздоровительных упражнений для офиса</p>
           </div>
 
-          {showRegister ? (
-            <RegisterForm
-              onRegister={auth.register}
-              onVerifyEmail={auth.verifyEmail}
-              onLogin={auth.login}
-              isLoading={auth.isLoading}
-              error={auth.error}
-              onLoginClick={() => setShowRegister(false)}
-            />
-          ) : (
-            <LoginForm
-              onLogin={auth.login}
-              isLoading={auth.isLoading}
-              error={auth.error}
-              onRegisterClick={() => setShowRegister(true)}
-            />
-          )}
+          <LoginForm
+            onLogin={auth.login}
+            isLoading={auth.isLoading}
+            error={loginError}
+            onRegisterClick={() => {}}
+          />
         </div>
       </div>
     );
