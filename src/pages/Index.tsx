@@ -9,6 +9,9 @@ import ProgressTab from '@/components/ProgressTab';
 import { ReportsTab, MethodologyTab, ProfileTab } from '@/components/OtherTabs';
 import FeedbackDialog from '@/components/FeedbackDialog';
 import LoginForm from '@/components/extensions/auth-email/LoginForm';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   requestNotificationPermission,
   scheduleNotification,
@@ -118,19 +121,44 @@ export default function Index() {
   });
   const notificationTimeouts = useRef<Map<number, number>>(new Map());
 
-  const [isAuthenticated, setIsAuthenticated] = useState(() => localStorage.getItem('auth_user') === 'artem');
+  const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem('auth_user'));
+  const [authView, setAuthView] = useState<'login' | 'register' | 'success'>('login');
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [regLoading, setRegLoading] = useState(false);
+  const [regForm, setRegForm] = useState({ name: '', email: '', password: '', confirm: '' });
+  const [regError, setRegError] = useState<string | null>(null);
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!regForm.name.trim()) { setRegError('Введите имя'); return; }
+    if (!regForm.email.includes('@')) { setRegError('Введите корректный email'); return; }
+    if (regForm.password.length < 6) { setRegError('Пароль должен быть не менее 6 символов'); return; }
+    if (regForm.password !== regForm.confirm) { setRegError('Пароли не совпадают'); return; }
+    setRegError(null);
+    setRegLoading(true);
+    await new Promise(r => setTimeout(r, 1500));
+    setRegLoading(false);
+    setAuthView('success');
+    setTimeout(() => {
+      localStorage.setItem('auth_user', regForm.email);
+      localStorage.setItem('auth_name', regForm.name);
+      setIsAuthenticated(true);
+    }, 2000);
+  };
 
   const auth = {
     isLoading: false,
     isAuthenticated,
     logout: () => {
       localStorage.removeItem('auth_user');
+      localStorage.removeItem('auth_name');
       setIsAuthenticated(false);
+      setAuthView('login');
     },
     login: async (payload: { email: string; password: string }) => {
       if (payload.email === 'artem' && payload.password === 'artem') {
-        localStorage.setItem('auth_user', 'artem');
+        localStorage.setItem('auth_user', payload.email);
+        localStorage.setItem('auth_name', 'Артём');
         setLoginError(null);
         setIsAuthenticated(true);
         return true;
@@ -292,12 +320,75 @@ export default function Index() {
             <p className="text-muted-foreground">Комплекс оздоровительных упражнений для офиса</p>
           </div>
 
-          <LoginForm
-            onLogin={auth.login}
-            isLoading={auth.isLoading}
-            error={loginError}
-            onRegisterClick={() => {}}
-          />
+          {authView === 'login' && (
+            <LoginForm
+              onLogin={auth.login}
+              isLoading={auth.isLoading}
+              error={loginError}
+              onRegisterClick={() => { setLoginError(null); setAuthView('register'); }}
+            />
+          )}
+
+          {authView === 'register' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Регистрация</CardTitle>
+                <CardDescription>Создайте аккаунт для доступа к упражнениям</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleRegister} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="reg-name">Имя</Label>
+                    <Input id="reg-name" placeholder="Иван Иванов" value={regForm.name}
+                      onChange={e => setRegForm(f => ({ ...f, name: e.target.value }))} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="reg-email">Email</Label>
+                    <Input id="reg-email" type="email" placeholder="you@example.com" value={regForm.email}
+                      onChange={e => setRegForm(f => ({ ...f, email: e.target.value }))} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="reg-password">Пароль</Label>
+                    <Input id="reg-password" type="password" placeholder="Минимум 6 символов" value={regForm.password}
+                      onChange={e => setRegForm(f => ({ ...f, password: e.target.value }))} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="reg-confirm">Повторите пароль</Label>
+                    <Input id="reg-confirm" type="password" placeholder="Повторите пароль" value={regForm.confirm}
+                      onChange={e => setRegForm(f => ({ ...f, confirm: e.target.value }))} />
+                  </div>
+                  {regError && <p className="text-sm text-destructive">{regError}</p>}
+                  <Button type="submit" className="w-full" disabled={regLoading}>
+                    {regLoading ? (
+                      <span className="flex items-center gap-2">
+                        <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+                        Регистрация...
+                      </span>
+                    ) : 'Зарегистрироваться'}
+                  </Button>
+                  <p className="text-center text-sm text-muted-foreground">
+                    Уже есть аккаунт?{' '}
+                    <button type="button" className="text-primary underline" onClick={() => { setRegError(null); setAuthView('login'); }}>
+                      Войти
+                    </button>
+                  </p>
+                </form>
+              </CardContent>
+            </Card>
+          )}
+
+          {authView === 'success' && (
+            <Card>
+              <CardContent className="py-12 text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto">
+                  <Icon name="CheckCircle" className="text-green-600" size={36} />
+                </div>
+                <h2 className="text-2xl font-bold">Добро пожаловать!</h2>
+                <p className="text-muted-foreground">Аккаунт успешно создан. Входим в систему...</p>
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     );
